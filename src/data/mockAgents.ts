@@ -1,0 +1,40 @@
+import { Agent } from '../types';
+
+export const MOCK_AGENTS: Agent[] = [
+  {
+    id: 'agent-1',
+    name: 'Carlos Mendoza',
+    role: 'Director de Ventas & Residencial de Lujo',
+    phone: '+34 611 223 344',
+    whatsapp: '+34 611 223 344',
+    email: 'carlos.mendoza@inmoelite.es',
+    photoUrl: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=600&q=80',
+    bio: 'Más de 14 años liderando operaciones inmobiliarias en zonas prime. Especialista en valoración patrimonial y negociación de alto nivel.',
+    languages: ['Español', 'Inglés'],
+    salesCount: 142,
+  },
+  {
+    id: 'agent-2',
+    name: 'Elena Santamaría',
+    role: 'Asesora Senior & Captación Exclusiva',
+    phone: '+34 622 334 455',
+    whatsapp: '+34 622 334 455',
+    email: 'elena.santamaria@inmoelite.es',
+    photoUrl: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=600&q=80',
+    bio: 'Apasionada por la arquitectura y el diseño de interiores. Experta en encontrar viviendas únicas y asesorar a compradores internacionales.',
+    languages: ['Español', 'Inglés', 'Francés'],
+    salesCount: 98,
+  },
+  {
+    id: 'agent-3',
+    name: 'Javier Rocha',
+    role: 'Especialista en Inversión & Alquileres Premium',
+    phone: '+34 633 445 566',
+    whatsapp: '+34 633 445 566',
+    email: 'javier.rocha@inmoelite.es',
+    photoUrl: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=600&q=80',
+    bio: 'Especializado en rentabilidad inmobiliaria, locales comerciales y carteras de alquiler seguro con perfil alto de inquilinos.',
+    languages: ['Español', 'Alemán'],
+    salesCount: 86,
+  },
+];

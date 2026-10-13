@@ -1,0 +1,124 @@
+import React from 'react';
+import { SiteConfig } from '../types';
+import { Building2, Phone, Heart, Sparkles, MessageCircle } from 'lucide-react';
+
+interface NavbarProps {
+  config: SiteConfig;
+  favoritesCount: number;
+  onOpenFavorites: () => void;
+  onOpenDemoCustomizer: () => void;
+  onScrollToSection: (sectionId: string) => void;
+}
+
+export const Navbar: React.FC<NavbarProps> = ({
+  config,
+  favoritesCount,
+  onOpenFavorites,
+  onOpenDemoCustomizer,
+  onScrollToSection,
+}) => {
+  return (
+    <header className="sticky top-0 z-40 w-full backdrop-blur-xl bg-slate-950/80 border-b border-slate-800/80 transition-colors">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
+        {/* LOGO & NOMBRE DE LA INMOBILIARIA */}
+        <div
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          className="flex items-center gap-3 cursor-pointer group select-none shrink-0"
+        >
+          <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-amber-500 to-amber-700 flex items-center justify-center text-slate-950 shadow-lg shadow-amber-500/20 group-hover:scale-105 transition-transform">
+            <Building2 size={24} className="stroke-[2.2]" />
+          </div>
+          <div className="text-left">
+            <span className="text-lg font-black tracking-tight text-white block leading-tight font-serif-luxury group-hover:text-amber-400 transition-colors">
+              {config.brandName}
+            </span>
+            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 block leading-none">
+              Real Estate Studio
+            </span>
+          </div>
+        </div>
+
+        {/* ENLACES DE NAVEGACIÓN (Desktop) */}
+        <nav className="hidden md:flex items-center gap-7 text-xs font-bold tracking-wider uppercase text-slate-300">
+          <button
+            onClick={() => onScrollToSection('catalogo')}
+            className="hover:text-amber-400 transition-colors cursor-pointer"
+          >
+            Propiedades
+          </button>
+          <button
+            onClick={() => onScrollToSection('vender')}
+            className="hover:text-amber-400 transition-colors cursor-pointer"
+          >
+            Vender Inmueble
+          </button>
+          <button
+            onClick={() => onScrollToSection('hipoteca')}
+            className="hover:text-amber-400 transition-colors cursor-pointer"
+          >
+            Calculadora Hipoteca
+          </button>
+          <button
+            onClick={() => onScrollToSection('equipo')}
+            className="hover:text-amber-400 transition-colors cursor-pointer"
+          >
+            Asesores
+          </button>
+          <button
+            onClick={() => onScrollToSection('contacto')}
+            className="hover:text-amber-400 transition-colors cursor-pointer"
+          >
+            Contacto
+          </button>
+        </nav>
+
+        {/* ACCIONES DE CONTACTO Y FAVORITOS */}
+        <div className="flex items-center gap-2.5 shrink-0">
+          {/* Botón de Favoritos */}
+          <button
+            onClick={onOpenFavorites}
+            className="relative p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-white hover:border-slate-700 transition cursor-pointer"
+            title="Ver Inmuebles Favoritos"
+          >
+            <Heart size={18} className={favoritesCount > 0 ? 'fill-rose-500 text-rose-500' : ''} />
+            {favoritesCount > 0 && (
+              <span className="absolute -top-1.5 -right-1.5 bg-rose-500 text-white text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center shadow-lg animate-pulse">
+                {favoritesCount}
+              </span>
+            )}
+          </button>
+
+          {/* Botón WhatsApp Inmobiliaria */}
+          <a
+            href={`https://wa.me/${config.contact.whatsapp.replace(/[^0-9]/g, '')}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hidden sm:flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20 px-3.5 py-2 rounded-xl text-xs font-bold transition"
+          >
+            <MessageCircle size={15} />
+            <span>WhatsApp</span>
+          </a>
+
+          {/* Botón Llamar */}
+          <a
+            href={`tel:${config.contact.phone}`}
+            className="hidden lg:flex items-center gap-2 bg-slate-900 border border-slate-800 hover:border-slate-700 px-3.5 py-2 rounded-xl text-xs font-bold text-slate-200 transition"
+          >
+            <Phone size={14} className="text-amber-400" />
+            <span>{config.contact.phone}</span>
+          </a>
+
+          {/* Botón de Ajustes de Marca (Para la reunión de venta) */}
+          <button
+            onClick={onOpenDemoCustomizer}
+            className="flex items-center gap-1.5 bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 px-3.5 py-2 rounded-xl text-xs font-black shadow-lg shadow-amber-500/20 hover:scale-105 active:scale-95 transition cursor-pointer"
+            title="Cambiar Nombre y Colores en Vivo para tu Cliente"
+          >
+            <Sparkles size={14} />
+            <span className="hidden sm:inline">Personalizar Marca</span>
+          </button>
+        </div>
+      </div>
+    </header>
+  );
+};
