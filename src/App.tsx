@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Property, SiteConfig, FilterState } from './types';
+import { Property, SiteConfig, FilterState, CurrencyMode } from './types';
 import { DEFAULT_SITE_CONFIG, THEME_PRESETS } from './config/siteConfig';
 import { MOCK_PROPERTIES } from './data/mockProperties';
 import { MOCK_AGENTS } from './data/mockAgents';
@@ -40,8 +40,14 @@ const INITIAL_FILTERS: FilterState = {
 export default function App() {
   // Configuración de Marca (Cargada desde localStorage si existe)
   const [config, setConfig] = useState<SiteConfig>(() => {
-    const saved = localStorage.getItem('inmo_custom_config');
-    return saved ? JSON.parse(saved) : DEFAULT_SITE_CONFIG;
+    try {
+      const saved = localStorage.getItem('inmo_custom_config');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        return { ...DEFAULT_SITE_CONFIG, ...parsed };
+      }
+    } catch (e) {}
+    return DEFAULT_SITE_CONFIG;
   });
 
   // Filtros activos
@@ -49,8 +55,11 @@ export default function App() {
 
   // Favoritos (IDs guardados en localStorage)
   const [favorites, setFavorites] = useState<string[]>(() => {
-    const saved = localStorage.getItem('inmo_favorites');
-    return saved ? JSON.parse(saved) : ['prop-1', 'prop-3']; // 2 de muestra
+    try {
+      const saved = localStorage.getItem('inmo_favorites');
+      return saved ? JSON.parse(saved) : ['prop-1', 'prop-3'];
+    } catch (e) {}
+    return ['prop-1', 'prop-3'];
   });
 
   // Modales y Drawers
@@ -58,23 +67,31 @@ export default function App() {
   const [isFavoritesOpen, setIsFavoritesOpen] = useState(false);
   const [isCustomizerOpen, setIsCustomizerOpen] = useState(false);
 
-  // Aplicar colores del tema al CSS raíz en tiempo real
+  // Aplicar tema en tiempo real y persistirlo de inmediato
   const applyThemeColors = (themeId: string) => {
-    const theme = THEME_PRESETS[themeId] || THEME_PRESETS['luxury-gold'];
-    document.documentElement.style.setProperty('--brand-primary', theme.primary);
-    document.documentElement.style.setProperty('--brand-accent', theme.accent);
-    document.documentElement.style.setProperty('--brand-accent-hover', theme.accentHover);
-    document.documentElement.style.setProperty('--brand-accent-light', theme.accentLight);
+    const validThemeId = THEME_PRESETS[themeId] ? themeId : 'luxury-gold';
+    document.documentElement.setAttribute('data-theme', validThemeId);
   };
 
+  // Efecto reactivo: cada vez que cambie config (o el tema), se aplica al DOM y se guarda en localStorage
   useEffect(() => {
     applyThemeColors(config.activeThemeId);
-  }, [config.activeThemeId]);
+    try {
+      localStorage.setItem('inmo_custom_config', JSON.stringify(config));
+    } catch (e) {}
+  }, [config]);
 
   // Guardar favoritos en localStorage
   useEffect(() => {
-    localStorage.setItem('inmo_favorites', JSON.stringify(favorites));
+    try {
+      localStorage.setItem('inmo_favorites', JSON.stringify(favorites));
+    } catch (e) {}
   }, [favorites]);
+
+  // Conmutador de moneda rápida ($ USD / ₡ CRC)
+  const handleToggleCurrency = (mode: CurrencyMode) => {
+    setConfig((prev) => ({ ...prev, currencyMode: mode }));
+  };
 
   // Toggle de favorito
   const handleToggleFavorite = (id: string) => {
@@ -96,9 +113,9 @@ export default function App() {
       // 2. Tipo de inmueble
       if (filters.propertyType !== 'todos' && prop.type !== filters.propertyType) return false;
 
-      // 3. Rango de precio
-      if (prop.price > filters.maxPrice) return false;
-      if (filters.minPrice > 0 && prop.price < filters.minPrice) return false;
+      // 3. Rango de precio en USD
+      if (prop.priceUSD > filters.maxPrice) return false;
+      if (filters.minPrice > 0 && prop.priceUSD < filters.minPrice) return false;
 
       // 4. Habitaciones
       if (filters.minBedrooms > 0 && prop.bedrooms < filters.minBedrooms) return false;
@@ -111,13 +128,14 @@ export default function App() {
       if (filters.onlyExclusives && prop.status !== 'exclusiva') return false;
       if (filters.onlyDiscounted && prop.status !== 'rebajado') return false;
 
-      // 6. Texto libre de búsqueda (título, barrio, ciudad, referencia)
+      // 6. Texto libre de búsqueda (título, cantón, barrio, provincia, referencia)
       if (filters.searchQuery.trim() !== '') {
         const query = filters.searchQuery.toLowerCase();
         const matches =
           prop.title.toLowerCase().includes(query) ||
           prop.neighborhood.toLowerCase().includes(query) ||
           prop.city.toLowerCase().includes(query) ||
+          prop.province.toLowerCase().includes(query) ||
           prop.reference.toLowerCase().includes(query) ||
           prop.description.toLowerCase().includes(query);
         if (!matches) return false;
@@ -142,13 +160,14 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-amber-500 selection:text-slate-950">
-      {/* 1. BARRA DE NAVEGACIÓN SUPERIOR */}
+      {/* 1. BARRA DE NAVEGACIÓN SUPERIOR CON CONMUTADOR DE MONEDA BIMONEDA */}
       <Navbar
         config={config}
         favoritesCount={favorites.length}
         onOpenFavorites={() => setIsFavoritesOpen(true)}
         onOpenDemoCustomizer={() => setIsCustomizerOpen(true)}
         onScrollToSection={handleScrollToSection}
+        onToggleCurrency={handleToggleCurrency}
       />
 
       {/* 2. HERO PRINCIPAL CON BUSCADOR INTELIGENTE */}
@@ -172,13 +191,13 @@ export default function App() {
           onResetFilters={() => setFilters(INITIAL_FILTERS)}
         />
 
-        {/* 4. CALCULADORA DE HIPOTECA INTERACTIVA */}
+        {/* 4. CALCULADORA DE CRÉDITO HIPOTECARIO EN COSTA RICA */}
         <MortgageCalculatorSection config={config} />
 
         {/* 5. SECCIÓN PARA PROPIETARIOS ("VENDER O ALQUILAR CON NOSOTROS") */}
         <SellPropertySection config={config} />
 
-        {/* 6. EQUIPO DE ASESORES INMOBILIARIOS */}
+        {/* 6. EQUIPO DE ASESORES INMOBILIARIOS EN COSTA RICA */}
         <AgentTeamSection agents={MOCK_AGENTS} config={config} />
 
         {/* 7. OPINIONES Y TESTIMONIOS */}
@@ -218,26 +237,26 @@ export default function App() {
         onApplyTheme={applyThemeColors}
       />
 
-      {/* BOTÓN FLOTANTE DISCRETO PARA REUNIÓN CON CLIENTE (Esquina inferior izquierda) */}
+      {/* BOTÓN FLOTANTE DISCRETO PARA REUNIÓN CON CLIENTE */}
       <div className="fixed bottom-5 left-5 z-40">
         <button
           onClick={() => setIsCustomizerOpen(true)}
-          className="flex items-center gap-2 bg-slate-900/90 backdrop-blur-md border border-amber-500/40 text-amber-300 hover:text-white px-3.5 py-2.5 rounded-full text-xs font-black shadow-2xl hover:scale-105 active:scale-95 transition cursor-pointer"
+          className="flex items-center gap-2 bg-slate-900/90 backdrop-blur-md border border-brand text-brand hover:text-white px-3.5 py-2.5 rounded-full text-xs font-black shadow-2xl hover:scale-105 active:scale-95 transition cursor-pointer"
           title="Abrir Personalizador de Marca en Vivo"
         >
-          <Sparkles size={14} className="text-amber-400" />
+          <Sparkles size={14} className="text-brand" />
           <span className="hidden sm:inline">Modo Demo / Ajustar Marca</span>
         </button>
       </div>
 
-      {/* BOTÓN FLOTANTE DE WHATSAPP (Esquina inferior derecha) */}
+      {/* BOTÓN FLOTANTE DE WHATSAPP COSTA RICA */}
       <div className="fixed bottom-5 right-5 z-40">
         <a
-          href={`https://wa.me/${config.contact.whatsapp.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`Hola ${config.brandName}, estoy navegando por su web y me gustaría hacer una consulta.`)}`}
+          href={`https://wa.me/${config.contact.whatsapp.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`Hola ${config.brandName}, estoy navegando por su web en Costa Rica y me gustaría hacer una consulta.`)}`}
           target="_blank"
           rel="noopener noreferrer"
           className="w-13 h-13 rounded-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 flex items-center justify-center shadow-2xl shadow-emerald-500/40 hover:scale-110 active:scale-95 transition"
-          title="Hablar por WhatsApp con un Asesor"
+          title="Hablar por WhatsApp con un Asesor en Costa Rica"
         >
           <MessageCircle size={26} className="fill-slate-950 stroke-[1.5]" />
         </a>

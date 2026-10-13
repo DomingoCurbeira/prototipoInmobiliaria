@@ -1,7 +1,7 @@
 import React from 'react';
 import { Property, SiteConfig } from '../types';
-import { formatCurrency } from '../config/siteConfig';
-import { X, Heart, Trash2, MessageCircle, ExternalLink } from 'lucide-react';
+import { formatDualPrice } from '../config/siteConfig';
+import { X, Heart, Trash2, MessageCircle } from 'lucide-react';
 
 interface FavoritesDrawerProps {
   isOpen: boolean;
@@ -24,11 +24,12 @@ export const FavoritesDrawer: React.FC<FavoritesDrawerProps> = ({
 }) => {
   if (!isOpen) return null;
 
-  const totalValue = favorites.reduce((acc, curr) => acc + curr.price, 0);
+  const totalValueUSD = favorites.reduce((acc, curr) => acc + curr.priceUSD, 0);
+  const totalValueCRC = Math.round(totalValueUSD * config.exchangeRate);
 
   const handleInquireAll = () => {
-    const refs = favorites.map((p) => `${p.reference} (${formatCurrency(p.price, config.currencySymbol)})`).join(', ');
-    const message = `Hola ${config.brandName}, tengo guardadas estas ${favorites.length} propiedades favoritas en su web: ${refs}. Me gustaría recibir más detalles y consultar disponibilidad.`;
+    const refs = favorites.map((p) => `${p.reference} ($${p.priceUSD.toLocaleString('en-US')} USD)`).join(', ');
+    const message = `Hola ${config.brandName}, tengo guardadas estas ${favorites.length} propiedades favoritas en su web: ${refs}. Me gustaría coordinar visitas en Costa Rica y consultar disponibilidad.`;
     const cleanNumber = config.contact.whatsapp.replace(/[^0-9]/g, '');
     window.open(`https://wa.me/${cleanNumber}?text=${encodeURIComponent(message)}`, '_blank');
   };
@@ -46,7 +47,7 @@ export const FavoritesDrawer: React.FC<FavoritesDrawerProps> = ({
               <h3 className="text-sm font-black text-white uppercase tracking-wider font-serif-luxury">
                 Mis Favoritos ({favorites.length})
               </h3>
-              <span className="text-[10px] text-slate-400">Propiedades guardadas</span>
+              <span className="text-[10px] text-slate-400">Propiedades guardadas en Costa Rica</span>
             </div>
           </div>
 
@@ -61,51 +62,60 @@ export const FavoritesDrawer: React.FC<FavoritesDrawerProps> = ({
         {/* LISTADO DE INMUEBLES GUARDADOS */}
         <div className="p-5 overflow-y-auto flex-1 space-y-3">
           {favorites.length > 0 ? (
-            favorites.map((prop) => (
-              <div
-                key={prop.id}
-                className="bg-slate-950 p-3 rounded-2xl border border-slate-800/80 flex items-center gap-3 hover:border-slate-700 transition"
-              >
-                <img
-                  src={prop.images[0]}
-                  alt={prop.title}
-                  className="w-16 h-16 rounded-xl object-cover shrink-0 cursor-pointer"
-                  onClick={() => {
-                    onOpenDetails(prop);
-                    onClose();
-                  }}
-                />
+            favorites.map((prop) => {
+              const priceData = formatDualPrice(
+                prop.priceUSD,
+                config.currencyMode,
+                config.exchangeRate,
+                prop.operation === 'alquiler'
+              );
 
-                <div className="flex-1 min-w-0">
-                  <span className="text-[9px] font-mono font-bold text-amber-400 block">
-                    {prop.reference}
-                  </span>
-                  <h4
+              return (
+                <div
+                  key={prop.id}
+                  className="bg-slate-950 p-3 rounded-2xl border border-slate-800/80 flex items-center gap-3 hover:border-slate-700 transition"
+                >
+                  <img
+                    src={prop.images[0]}
+                    alt={prop.title}
+                    className="w-16 h-16 rounded-xl object-cover shrink-0 cursor-pointer"
                     onClick={() => {
                       onOpenDetails(prop);
                       onClose();
                     }}
-                    className="text-xs font-bold text-white truncate cursor-pointer hover:text-amber-400"
-                  >
-                    {prop.title}
-                  </h4>
-                  <p className="text-[10px] text-slate-400 truncate">
-                    {prop.neighborhood}, {prop.city}
-                  </p>
-                  <span className="text-xs font-black text-amber-400 font-serif-luxury block mt-0.5">
-                    {formatCurrency(prop.price, config.currencySymbol)}
-                  </span>
-                </div>
+                  />
 
-                <button
-                  onClick={() => onRemoveFavorite(prop.id)}
-                  className="p-2 text-slate-500 hover:text-rose-400 transition cursor-pointer"
-                  title="Eliminar de favoritos"
-                >
-                  <Trash2 size={15} />
-                </button>
-              </div>
-            ))
+                  <div className="flex-1 min-w-0">
+                    <span className="text-[9px] font-mono font-bold text-brand block">
+                      {prop.reference}
+                    </span>
+                    <h4
+                      onClick={() => {
+                        onOpenDetails(prop);
+                        onClose();
+                      }}
+                      className="text-xs font-bold text-white truncate cursor-pointer hover:text-brand"
+                    >
+                      {prop.title}
+                    </h4>
+                    <p className="text-[10px] text-slate-400 truncate">
+                      {prop.neighborhood}, {prop.city}
+                    </p>
+                    <span className="text-xs font-black text-brand font-serif-luxury block mt-0.5">
+                      {priceData.primary}
+                    </span>
+                  </div>
+
+                  <button
+                    onClick={() => onRemoveFavorite(prop.id)}
+                    className="p-2 text-slate-500 hover:text-rose-400 transition cursor-pointer"
+                    title="Eliminar de favoritos"
+                  >
+                    <Trash2 size={15} />
+                  </button>
+                </div>
+              );
+            })
           ) : (
             <div className="text-center py-16 space-y-3">
               <Heart size={36} className="text-slate-700 mx-auto" />
@@ -120,10 +130,15 @@ export const FavoritesDrawer: React.FC<FavoritesDrawerProps> = ({
         {favorites.length > 0 && (
           <div className="p-5 border-t border-slate-800 bg-slate-950/80 space-y-3">
             <div className="flex justify-between items-baseline text-xs">
-              <span className="text-slate-400">Valor Total Estimado:</span>
-              <span className="text-base font-black text-amber-400 font-serif-luxury">
-                {formatCurrency(totalValue, config.currencySymbol)}
-              </span>
+              <span className="text-slate-400">Total Estimado:</span>
+              <div className="text-right">
+                <span className="text-base font-black text-brand font-serif-luxury block">
+                  ${totalValueUSD.toLocaleString('en-US')} USD
+                </span>
+                <span className="text-[10px] font-mono font-bold text-slate-400 block">
+                  ≈ ₡{totalValueCRC.toLocaleString('es-CR')} CRC
+                </span>
+              </div>
             </div>
 
             <button

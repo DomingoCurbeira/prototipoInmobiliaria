@@ -11,15 +11,15 @@ export const AgentTeamSection: React.FC<AgentTeamSectionProps> = ({ agents, conf
   return (
     <section id="equipo" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-left">
       <div className="text-center max-w-2xl mx-auto mb-12 space-y-2">
-        <div className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-widest text-amber-400">
+        <div className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-widest text-brand">
           <Users size={14} />
-          <span>Experiencia & Trato Personal</span>
+          <span>Experiencia en Costa Rica & Trato Personal</span>
         </div>
         <h2 className="text-3xl sm:text-4xl font-black text-white font-serif-luxury tracking-tight">
           Nuestros Asesores Inmobiliarios
         </h2>
         <p className="text-xs sm:text-sm text-slate-400">
-          Profesionales senior colegiados con profundo conocimiento del mercado residencial y financiero.
+          Especialistas colegiados en bienes raíces residenciales y de lujo en el Gran Área Metropolitana y zonas costeras.
         </p>
       </div>
 
@@ -38,7 +38,7 @@ export const AgentTeamSection: React.FC<AgentTeamSectionProps> = ({ agents, conf
                   className="w-full h-full object-cover object-top hover:scale-105 transition duration-500"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent" />
-                <div className="absolute bottom-3 left-3 bg-slate-950/80 backdrop-blur px-2.5 py-1 rounded-lg border border-white/10 text-[10px] font-bold text-amber-400 flex items-center gap-1">
+                <div className="absolute bottom-3 left-3 bg-slate-950/80 backdrop-blur px-2.5 py-1 rounded-lg border border-white/10 text-[10px] font-bold text-brand flex items-center gap-1">
                   <Award size={12} />
                   <span>{agent.salesCount} operaciones</span>
                 </div>
@@ -50,7 +50,7 @@ export const AgentTeamSection: React.FC<AgentTeamSectionProps> = ({ agents, conf
                   <h3 className="text-lg font-black text-white font-serif-luxury">
                     {agent.name}
                   </h3>
-                  <p className="text-xs font-semibold text-amber-400 mt-0.5">
+                  <p className="text-xs font-semibold text-brand mt-0.5">
                     {agent.role}
                   </p>
                 </div>
@@ -70,7 +70,7 @@ export const AgentTeamSection: React.FC<AgentTeamSectionProps> = ({ agents, conf
             {/* Acciones de contacto directo */}
             <div className="p-4 bg-slate-950/80 border-t border-slate-800/80 flex items-center gap-2">
               <a
-                href={`https://wa.me/${agent.whatsapp.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`Hola ${agent.name}, vi tu perfil en la web de ${config.brandName} y me gustaría recibir asesoramiento.`)}`}
+                href={`https://wa.me/${agent.whatsapp.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`Hola ${agent.name}, vi tu perfil en la web de ${config.brandName} y me gustaría recibir asesoría sobre propiedades en Costa Rica.`)}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex-1 bg-emerald-500/10 border border-emerald-500/30 hover:bg-emerald-500/20 text-emerald-300 font-bold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 transition"

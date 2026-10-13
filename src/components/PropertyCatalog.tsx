@@ -26,10 +26,10 @@ export const PropertyCatalog: React.FC<PropertyCatalogProps> = ({
 }) => {
   const [sortBy, setSortBy] = useState<SortOption>('newest');
 
-  // Ordenamiento de propiedades
+  // Ordenamiento de propiedades según precio en USD o superficie
   const sortedProperties = [...properties].sort((a, b) => {
-    if (sortBy === 'price-asc') return a.price - b.price;
-    if (sortBy === 'price-desc') return b.price - a.price;
+    if (sortBy === 'price-asc') return a.priceUSD - b.priceUSD;
+    if (sortBy === 'price-desc') return b.priceUSD - a.priceUSD;
     if (sortBy === 'area-desc') return b.areaBuilt - a.areaBuilt;
     return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
   });
@@ -39,15 +39,15 @@ export const PropertyCatalog: React.FC<PropertyCatalogProps> = ({
       {/* CABECERA DEL CATÁLOGO */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
         <div>
-          <div className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-amber-400 mb-1">
+          <div className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-brand mb-1">
             <Sparkles size={14} />
-            <span>Colección Seleccionada</span>
+            <span>Colección Seleccionada en Costa Rica</span>
           </div>
           <h2 className="text-3xl sm:text-4xl font-black text-white font-serif-luxury tracking-tight">
-            Inmuebles Disponibles
+            Propiedades Disponibles
           </h2>
           <p className="text-xs sm:text-sm text-slate-400 mt-1">
-            Mostrando <span className="font-bold text-white">{sortedProperties.length}</span> propiedades en {filters.operation === 'venta' ? 'venta' : 'alquiler'}
+            Mostrando <span className="font-bold text-white">{sortedProperties.length}</span> inmuebles en {filters.operation === 'venta' ? 'venta' : 'alquiler'} ({config.currencyMode === 'USD' ? 'Precios en Dólares USD' : 'Precios en Colones CRC'})
           </p>
         </div>
 
@@ -57,7 +57,7 @@ export const PropertyCatalog: React.FC<PropertyCatalogProps> = ({
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as SortOption)}
-            className="bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs font-bold text-white focus:outline-none focus:border-amber-500 cursor-pointer"
+            className="bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs font-bold text-white focus:outline-none focus:border-brand-solid cursor-pointer"
           >
             <option value="newest">Más recientes</option>
             <option value="price-asc">Precio: Menor a Mayor</option>
@@ -84,18 +84,18 @@ export const PropertyCatalog: React.FC<PropertyCatalogProps> = ({
       ) : (
         /* ESTADO VACÍO SI NINGUNA PROPIEDAD COINCIDE CON LOS FILTROS */
         <div className="bg-slate-900/60 border border-slate-800 rounded-3xl p-12 text-center max-w-xl mx-auto space-y-4">
-          <div className="w-16 h-16 rounded-full bg-amber-500/10 text-amber-400 flex items-center justify-center mx-auto">
+          <div className="w-16 h-16 rounded-full bg-brand-light text-brand flex items-center justify-center mx-auto">
             <SlidersHorizontal size={28} />
           </div>
           <h3 className="text-lg font-black text-white font-serif-luxury">
             No se encontraron inmuebles con estos filtros
           </h3>
           <p className="text-xs text-slate-400 max-w-sm mx-auto leading-relaxed">
-            Prueba a ampliar el rango de precio o desactivar algunos filtros avanzados para ver más opciones disponibles.
+            Prueba a ampliar el rango de precio o desactivar algunos filtros avanzados para ver más opciones en Costa Rica.
           </p>
           <button
             onClick={onResetFilters}
-            className="inline-flex items-center gap-2 bg-amber-500 text-slate-950 px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider hover:bg-amber-400 transition cursor-pointer"
+            className="inline-flex items-center gap-2 bg-brand text-slate-950 px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition cursor-pointer"
           >
             <RotateCcw size={14} />
             <span>Restablecer Filtros de Búsqueda</span>

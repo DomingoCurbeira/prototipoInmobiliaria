@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { SiteConfig } from '../types';
+import { SiteConfig, CurrencyMode } from '../types';
 import { THEME_PRESETS, DEFAULT_SITE_CONFIG } from '../config/siteConfig';
-import { X, Sparkles, Palette, Building2, Phone, RotateCcw, Check, Save } from 'lucide-react';
+import { X, Sparkles, Palette, Building2, Phone, RotateCcw, Check, Save, DollarSign } from 'lucide-react';
 
 interface DemoCustomizerDrawerProps {
   isOpen: boolean;
@@ -22,8 +22,17 @@ export const DemoCustomizerDrawer: React.FC<DemoCustomizerDrawerProps> = ({
 
   if (!isOpen) return null;
 
+  // Selección de paleta con persistencia automática inmediata
+  const handleSelectTheme = (themeId: string) => {
+    onApplyTheme(themeId);
+    const updated = { ...config, activeThemeId: themeId };
+    setConfig(updated);
+    localStorage.setItem('inmo_custom_config', JSON.stringify(updated));
+  };
+
   const handleSaveToLocalStorage = () => {
     localStorage.setItem('inmo_custom_config', JSON.stringify(config));
+    onApplyTheme(config.activeThemeId);
     setSavedSuccess(true);
     setTimeout(() => setSavedSuccess(false), 2000);
   };
@@ -40,14 +49,14 @@ export const DemoCustomizerDrawer: React.FC<DemoCustomizerDrawerProps> = ({
         {/* CABECERA */}
         <div className="p-5 border-b border-slate-800 flex items-center justify-between bg-slate-950/80">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg bg-brand-light text-brand flex items-center justify-center">
               <Sparkles size={16} />
             </div>
             <div>
               <h3 className="text-sm font-black text-white uppercase tracking-wider font-serif-luxury">
-                Personalizador de Marca (Modo Demo)
+                Personalizador de Marca (Costa Rica)
               </h3>
-              <span className="text-[10px] text-slate-400">Adapta el prototipo a tu cliente en 1 clic</span>
+              <span className="text-[10px] text-slate-400">Cambia colores, moneda y datos en 1 clic</span>
             </div>
           </div>
 
@@ -64,46 +73,114 @@ export const DemoCustomizerDrawer: React.FC<DemoCustomizerDrawerProps> = ({
           {/* SELECCIÓN DE PALETA DE COLOR */}
           <div className="space-y-2">
             <label className="text-[10px] font-black uppercase text-slate-300 flex items-center gap-1.5">
-              <Palette size={13} className="text-amber-400" />
-              <span>Paleta de Colores de Marca</span>
+              <Palette size={13} className="text-brand" />
+              <span>Paleta de Colores en Tiempo Real</span>
+            </label>
+
+            <div className="grid grid-cols-1 gap-2">
+              {Object.entries(THEME_PRESETS).map(([id, theme]) => {
+                const isSelected = config.activeThemeId === id;
+                return (
+                  <button
+                    key={id}
+                    type="button"
+                    onClick={() => handleSelectTheme(id)}
+                    className={`p-3 rounded-2xl border text-left transition cursor-pointer flex items-center justify-between ${
+                      isSelected
+                        ? 'border-brand-solid bg-brand-light shadow-md'
+                        : 'border-slate-800 bg-slate-950 hover:border-slate-700'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <span
+                        className="w-5 h-5 rounded-full border border-white/20 shadow-sm shrink-0"
+                        style={{ backgroundColor: theme.accent }}
+                      />
+                      <div>
+                        <span className="text-xs font-black text-white block">
+                          {theme.name}
+                        </span>
+                        <span className="text-[10px] text-slate-400 block">
+                          {theme.description}
+                        </span>
+                      </div>
+                    </div>
+                    {isSelected && <Check size={16} className="text-brand shrink-0" />}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* MONEDA & TIPO DE CAMBIO EN COSTA RICA */}
+          <div className="space-y-3 pt-3 border-t border-slate-800/80">
+            <label className="text-[10px] font-black uppercase text-slate-300 flex items-center gap-1.5">
+              <DollarSign size={13} className="text-brand" />
+              <span>Moneda & Tipo de Cambio en Costa Rica</span>
             </label>
 
             <div className="grid grid-cols-2 gap-2">
-              {Object.entries(THEME_PRESETS).map(([id, theme]) => (
-                <button
-                  key={id}
-                  type="button"
-                  onClick={() => {
-                    setConfig((prev) => ({ ...prev, activeThemeId: id }));
-                    onApplyTheme(id);
+              <div>
+                <label className="block text-[10px] font-bold text-slate-400 mb-1">
+                  Moneda Principal
+                </label>
+                <div className="grid grid-cols-2 gap-1 p-1 bg-slate-950 rounded-xl border border-slate-800">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const updated: SiteConfig = { ...config, currencyMode: 'USD' };
+                      setConfig(updated);
+                      localStorage.setItem('inmo_custom_config', JSON.stringify(updated));
+                    }}
+                    className={`py-1.5 rounded-lg font-bold text-xs transition cursor-pointer ${
+                      config.currencyMode === 'USD'
+                        ? 'bg-brand text-slate-950 font-black'
+                        : 'text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    $ USD
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const updated: SiteConfig = { ...config, currencyMode: 'CRC' };
+                      setConfig(updated);
+                      localStorage.setItem('inmo_custom_config', JSON.stringify(updated));
+                    }}
+                    className={`py-1.5 rounded-lg font-bold text-xs transition cursor-pointer ${
+                      config.currencyMode === 'CRC'
+                        ? 'bg-brand text-slate-950 font-black'
+                        : 'text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    ₡ CRC
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold text-slate-400 mb-1">
+                  Tipo de Cambio (₡ / $1 USD)
+                </label>
+                <input
+                  type="number"
+                  value={config.exchangeRate}
+                  onChange={(e) => {
+                    const rate = Number(e.target.value) || 520;
+                    const updated = { ...config, exchangeRate: rate };
+                    setConfig(updated);
+                    localStorage.setItem('inmo_custom_config', JSON.stringify(updated));
                   }}
-                  className={`p-3 rounded-2xl border text-left transition cursor-pointer flex flex-col justify-between ${
-                    config.activeThemeId === id
-                      ? 'border-amber-500 bg-amber-500/10 shadow-lg'
-                      : 'border-slate-800 bg-slate-950 hover:border-slate-700'
-                  }`}
-                >
-                  <div className="flex items-center gap-2 mb-2">
-                    <span
-                      className="w-4 h-4 rounded-full border border-white/20 shadow-sm"
-                      style={{ backgroundColor: theme.accent }}
-                    />
-                    <span className="text-[11px] font-black text-white truncate">
-                      {theme.name.split(' ')[0]}
-                    </span>
-                  </div>
-                  <span className="text-[9px] text-slate-400 leading-tight">
-                    {theme.name}
-                  </span>
-                </button>
-              ))}
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-mono font-bold focus:outline-none focus:border-brand-solid"
+                />
+              </div>
             </div>
           </div>
 
           {/* DATOS DE LA INMOBILIARIA */}
-          <div className="space-y-3 pt-2 border-t border-slate-800/80">
+          <div className="space-y-3 pt-3 border-t border-slate-800/80">
             <label className="text-[10px] font-black uppercase text-slate-300 flex items-center gap-1.5">
-              <Building2 size={13} className="text-amber-400" />
+              <Building2 size={13} className="text-brand" />
               <span>Identidad Comercial</span>
             </label>
 
@@ -115,8 +192,8 @@ export const DemoCustomizerDrawer: React.FC<DemoCustomizerDrawerProps> = ({
                 type="text"
                 value={config.brandName}
                 onChange={(e) => setConfig((prev) => ({ ...prev, brandName: e.target.value }))}
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-bold focus:outline-none focus:border-amber-500"
-                placeholder="Ej: Costa Blanca Prime"
+                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-bold focus:outline-none focus:border-brand-solid"
+                placeholder="Ej: Costa Rica Luxury Properties"
               />
             </div>
 
@@ -128,56 +205,40 @@ export const DemoCustomizerDrawer: React.FC<DemoCustomizerDrawerProps> = ({
                 type="text"
                 value={config.slogan}
                 onChange={(e) => setConfig((prev) => ({ ...prev, slogan: e.target.value }))}
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-500"
-                placeholder="Ej: Inmuebles Exclusivos en Zonas Prime"
+                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-brand-solid"
+                placeholder="Ej: Bienes Raíces Exclusivos en Costa Rica"
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-2">
-              <div>
-                <label className="block text-[10px] font-bold text-slate-400 mb-1">
-                  Símbolo de Moneda
-                </label>
-                <select
-                  value={config.currencySymbol}
-                  onChange={(e) => setConfig((prev) => ({ ...prev, currencySymbol: e.target.value }))}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-bold focus:outline-none focus:border-amber-500 cursor-pointer"
-                >
-                  <option value="€">Euros (€)</option>
-                  <option value="$">Dólares ($)</option>
-                  <option value="£">Libras (£)</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-[10px] font-bold text-slate-400 mb-1">
-                  Ciudad Principal
-                </label>
-                <input
-                  type="text"
-                  value={config.contact.address.split(',').pop()?.trim() || 'Madrid'}
-                  onChange={(e) =>
-                    setConfig((prev) => ({
-                      ...prev,
-                      contact: { ...prev.contact, address: `Paseo Principal, ${e.target.value}` },
-                    }))
-                  }
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-500"
-                />
-              </div>
+            <div>
+              <label className="block text-[10px] font-bold text-slate-400 mb-1">
+                Dirección / Sede
+              </label>
+              <input
+                type="text"
+                value={config.contact.address}
+                onChange={(e) =>
+                  setConfig((prev) => ({
+                    ...prev,
+                    contact: { ...prev.contact, address: e.target.value },
+                  }))
+                }
+                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-brand-solid"
+                placeholder="Plaza Tempo, Escazú, San José, Costa Rica"
+              />
             </div>
           </div>
 
-          {/* DATOS DE CONTACTO */}
-          <div className="space-y-3 pt-2 border-t border-slate-800/80">
+          {/* DATOS DE CONTACTO EN COSTA RICA */}
+          <div className="space-y-3 pt-3 border-t border-slate-800/80">
             <label className="text-[10px] font-black uppercase text-slate-300 flex items-center gap-1.5">
-              <Phone size={13} className="text-amber-400" />
-              <span>Canales de Contacto Directo</span>
+              <Phone size={13} className="text-brand" />
+              <span>Teléfonos y WhatsApp de Costa Rica (+506)</span>
             </label>
 
             <div>
               <label className="block text-[10px] font-bold text-slate-400 mb-1">
-                WhatsApp para recibir solicitudes
+                WhatsApp para recibir solicitudes de clientes
               </label>
               <input
                 type="text"
@@ -189,29 +250,46 @@ export const DemoCustomizerDrawer: React.FC<DemoCustomizerDrawerProps> = ({
                   }))
                 }
                 className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-emerald-400 font-mono font-bold focus:outline-none focus:border-emerald-500"
-                placeholder="+34 600 123 456"
+                placeholder="+506 8800-1234"
               />
-              <span className="text-[9px] text-slate-500 block mt-0.5">
-                Los botones de WhatsApp de la web enviarán los mensajes a este número.
-              </span>
             </div>
 
-            <div>
-              <label className="block text-[10px] font-bold text-slate-400 mb-1">
-                Teléfono Fijo / Centralita
-              </label>
-              <input
-                type="text"
-                value={config.contact.phone}
-                onChange={(e) =>
-                  setConfig((prev) => ({
-                    ...prev,
-                    contact: { ...prev.contact, phone: e.target.value },
-                  }))
-                }
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-500"
-                placeholder="+34 912 345 678"
-              />
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label className="block text-[10px] font-bold text-slate-400 mb-1">
+                  Teléfono de Oficina
+                </label>
+                <input
+                  type="text"
+                  value={config.contact.phone}
+                  onChange={(e) =>
+                    setConfig((prev) => ({
+                      ...prev,
+                      contact: { ...prev.contact, phone: e.target.value },
+                    }))
+                  }
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-mono focus:outline-none focus:border-brand-solid"
+                  placeholder="+506 2289-4500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold text-slate-400 mb-1">
+                  SINPE Móvil
+                </label>
+                <input
+                  type="text"
+                  value={config.contact.sinpeMovil || '+506 8800-1234'}
+                  onChange={(e) =>
+                    setConfig((prev) => ({
+                      ...prev,
+                      contact: { ...prev.contact, sinpeMovil: e.target.value },
+                    }))
+                  }
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-mono focus:outline-none focus:border-brand-solid"
+                  placeholder="+506 8800-1234"
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -220,17 +298,17 @@ export const DemoCustomizerDrawer: React.FC<DemoCustomizerDrawerProps> = ({
         <div className="p-5 border-t border-slate-800 bg-slate-950/80 space-y-2">
           <button
             onClick={handleSaveToLocalStorage}
-            className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-black py-3 px-4 rounded-xl text-xs uppercase tracking-wider transition shadow-lg shadow-amber-500/20 cursor-pointer active:scale-95"
+            className="w-full flex items-center justify-center gap-2 bg-brand-grad text-slate-950 font-black py-3 px-4 rounded-xl text-xs uppercase tracking-wider transition shadow-brand cursor-pointer active:scale-95"
           >
             {savedSuccess ? (
               <>
                 <Check size={16} />
-                <span>¡Guardado en este Navegador!</span>
+                <span>¡Guardado Permanentemente en este Navegador!</span>
               </>
             ) : (
               <>
                 <Save size={16} />
-                <span>Guardar Cambios de Marca</span>
+                <span>Guardar Configuración en el Navegador</span>
               </>
             )}
           </button>
@@ -240,7 +318,7 @@ export const DemoCustomizerDrawer: React.FC<DemoCustomizerDrawerProps> = ({
             className="w-full flex items-center justify-center gap-1.5 text-center text-[10px] text-slate-500 hover:text-slate-300 transition py-1 cursor-pointer"
           >
             <RotateCcw size={12} />
-            <span>Restablecer valores originales</span>
+            <span>Restablecer valores originales de Costa Rica</span>
           </button>
         </div>
       </div>

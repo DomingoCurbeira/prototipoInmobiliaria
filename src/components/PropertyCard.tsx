@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Property, SiteConfig } from '../types';
-import { formatCurrency, getWhatsAppInquiryUrl } from '../config/siteConfig';
+import { formatDualPrice, getWhatsAppInquiryUrl } from '../config/siteConfig';
 import {
   Bed,
   Bath,
@@ -16,6 +16,7 @@ import {
   Sun,
   Eye,
   MessageCircle,
+  ShieldCheck,
 } from 'lucide-react';
 
 interface PropertyCardProps {
@@ -35,10 +36,19 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
 }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
-  const priceFormatted = formatCurrency(property.price, config.currencySymbol);
-  const pricePerM2 = Math.round(property.price / property.areaBuilt);
+  // Formato Bimoneda Costa Rica (Dólares USD y Colones CRC)
+  const isRental = property.operation === 'alquiler';
+  const priceData = formatDualPrice(
+    property.priceUSD,
+    config.currencyMode,
+    config.exchangeRate,
+    isRental
+  );
 
-  // Manejar cambio de foto en el mini-carrusel
+  const previousPriceData = property.previousPriceUSD
+    ? formatDualPrice(property.previousPriceUSD, config.currencyMode, config.exchangeRate, isRental)
+    : null;
+
   const nextPhoto = (e: React.MouseEvent) => {
     e.stopPropagation();
     setCurrentImageIndex((prev) => (prev + 1) % property.images.length);
@@ -53,7 +63,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
     config.contact.whatsapp,
     property.reference,
     property.title,
-    priceFormatted
+    priceData.primary
   );
 
   return (
@@ -76,15 +86,15 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
           </span>
 
           {property.status === 'exclusiva' && (
-            <span className="bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider shadow flex items-center gap-1">
+            <span className="bg-brand-grad text-slate-950 px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider shadow flex items-center gap-1">
               <Sparkles size={11} />
               <span>Exclusiva</span>
             </span>
           )}
 
-          {property.status === 'rebajado' && property.previousPrice && (
+          {property.status === 'rebajado' && property.previousPriceUSD && (
             <span className="bg-emerald-500 text-slate-950 px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider shadow animate-pulse">
-              🔥 Bajó {(property.previousPrice - property.price).toLocaleString('es-ES')} {config.currencySymbol}
+              🔥 Bajó ${((property.previousPriceUSD - property.priceUSD)).toLocaleString('en-US')} USD
             </span>
           )}
 
@@ -116,7 +126,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
           />
         </button>
 
-        {/* CONTROLES DE NAVEGACIÓN DE FOTOS (Mini-carrusel) */}
+        {/* CONTROLES DE NAVEGACIÓN DE FOTOS */}
         {property.images.length > 1 && (
           <div className="absolute inset-y-0 inset-x-2 flex items-center justify-between pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
             <button
@@ -140,101 +150,101 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
         </div>
 
         {/* REFERENCIA DISCRETA INFERIOR IZQUIERDA */}
-        <div className="absolute bottom-3 left-3 bg-slate-950/80 backdrop-blur-md px-2 py-0.5 rounded-md text-[10px] font-mono font-bold text-amber-400 border border-white/10">
+        <div className="absolute bottom-3 left-3 bg-slate-950/80 backdrop-blur-md px-2 py-0.5 rounded-md text-[10px] font-mono font-bold text-brand border border-white/10">
           {property.reference}
         </div>
       </div>
 
-      {/* SECCIÓN INTERMEDIA: DATOS CLAVE Y PRECIO */}
+      {/* SECCIÓN INTERMEDIA: DATOS CLAVE Y PRECIO BIMONEDA */}
       <div className="p-5 space-y-3.5 flex-1 flex flex-col justify-between">
         <div className="space-y-1.5">
-          {/* Ubicación y Barrio */}
+          {/* Ubicación en Costa Rica */}
           <div className="flex items-center gap-1.5 text-xs text-slate-400">
-            <MapPin size={13} className="text-amber-400 shrink-0" />
+            <MapPin size={13} className="text-brand shrink-0" />
             <span className="font-semibold text-slate-300">
-              {property.neighborhood}, {property.city}
+              {property.neighborhood}, {property.city} ({property.province})
             </span>
           </div>
 
           {/* Título de la propiedad */}
           <h3
             onClick={() => onOpenDetails(property)}
-            className="text-base font-bold text-white hover:text-amber-400 transition-colors cursor-pointer line-clamp-1 leading-snug"
+            className="text-base font-bold text-white hover:text-brand transition-colors cursor-pointer line-clamp-1 leading-snug"
           >
             {property.title}
           </h3>
 
-          {/* Destacado emocional de ubicación si existe */}
+          {/* Destacado emocional de ubicación */}
           {property.locationHighlights && (
-            <p className="text-[11px] text-amber-300/80 italic font-medium line-clamp-1">
+            <p className="text-[11px] text-brand/90 italic font-medium line-clamp-1">
               ✨ {property.locationHighlights}
             </p>
           )}
         </div>
 
-        {/* BLOQUE DE PRECIO */}
-        <div className="pt-2 border-t border-slate-800/80 flex items-baseline justify-between">
-          <div>
-            {property.previousPrice && property.status === 'rebajado' && (
-              <span className="text-xs text-slate-500 line-through block font-mono">
-                {formatCurrency(property.previousPrice, config.currencySymbol)}
+        {/* BLOQUE DE PRECIO BIMONEDA (DÓLARES & COLONES) */}
+        <div className="pt-2 border-t border-slate-800/80">
+          {previousPriceData && property.status === 'rebajado' && (
+            <span className="text-xs text-slate-500 line-through block font-mono">
+              {previousPriceData.primary}
+            </span>
+          )}
+          <div className="flex items-baseline justify-between">
+            <div>
+              <span className="text-2xl font-black text-white font-serif-luxury tracking-tight block leading-tight">
+                {priceData.primary}
               </span>
-            )}
-            <div className="flex items-baseline gap-2">
-              <span className="text-2xl font-black text-white font-serif-luxury tracking-tight">
-                {priceFormatted}
+              <span className="text-xs font-mono font-semibold text-brand block mt-0.5">
+                {priceData.secondary}
               </span>
-              {property.operation === 'alquiler' && (
-                <span className="text-xs text-slate-400 font-bold">/mes</span>
-              )}
             </div>
-          </div>
 
-          <span className="text-[11px] font-mono text-slate-400 font-medium">
-            {pricePerM2.toLocaleString('es-ES')} {config.currencySymbol}/m²
-          </span>
+            <span className="text-[11px] font-mono text-slate-400 font-medium">
+              {priceData.perM2}
+            </span>
+          </div>
         </div>
 
-        {/* CUADRÍCULA DE ICONOS DE CARACTERÍSTICAS (Dormitorios, Baños, Cochera, m², etc.) */}
+        {/* CUADRÍCULA DE ICONOS DE CARACTERÍSTICAS */}
         <div className="grid grid-cols-4 gap-2 pt-3 border-t border-slate-800/80 text-center">
           {/* 1. Habitaciones */}
           <div className="bg-slate-950/60 p-2 rounded-xl border border-slate-800/80 flex flex-col items-center justify-center">
             <div className="flex items-center gap-1 text-slate-400 mb-0.5">
-              <Bed size={14} className="text-amber-400" />
+              <Bed size={14} className="text-brand" />
               <span className="text-xs font-black text-white">{property.bedrooms}</span>
             </div>
-            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">Dorm.</span>
+            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">Habit.</span>
           </div>
 
           {/* 2. Baños */}
           <div className="bg-slate-950/60 p-2 rounded-xl border border-slate-800/80 flex flex-col items-center justify-center">
             <div className="flex items-center gap-1 text-slate-400 mb-0.5">
-              <Bath size={14} className="text-amber-400" />
+              <Bath size={14} className="text-brand" />
               <span className="text-xs font-black text-white">{property.bathrooms}</span>
             </div>
             <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">Baños</span>
           </div>
 
-          {/* 3. Plazas de Garaje / Cochera */}
+          {/* 3. Parqueos / Cochera */}
           <div className="bg-slate-950/60 p-2 rounded-xl border border-slate-800/80 flex flex-col items-center justify-center">
             <div className="flex items-center gap-1 text-slate-400 mb-0.5">
-              <Car size={14} className="text-amber-400" />
+              <Car size={14} className="text-brand" />
               <span className="text-xs font-black text-white">{property.garageSpots}</span>
             </div>
-            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">Garaje</span>
+            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">Parqueos</span>
           </div>
 
           {/* 4. Metros Cuadrados */}
           <div className="bg-slate-950/60 p-2 rounded-xl border border-slate-800/80 flex flex-col items-center justify-center">
             <div className="flex items-center gap-1 text-slate-400 mb-0.5">
-              <Maximize2 size={13} className="text-amber-400" />
+              <Maximize2 size={13} className="text-brand" />
               <span className="text-xs font-black text-white">{property.areaBuilt}</span>
             </div>
             <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">m² const.</span>
           </div>
         </div>
 
-        {/* Fila de comodidades extra (Piscina, Terraza, Calificación energética) */}
+        {/* Fila de comodidades extra (Piscina, Seguridad 24/7, Terraza) */}
         <div className="flex items-center justify-between text-[11px] text-slate-400 px-1 pt-1">
           <div className="flex items-center gap-2">
             {property.hasPool && (
@@ -244,26 +254,29 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
               </span>
             )}
             {property.hasTerrace && (
-              <span className="flex items-center gap-1 text-amber-300" title="Terraza / Balcón">
+              <span className="flex items-center gap-1 text-brand" title="Terraza / Balcón">
                 <Sun size={13} />
                 <span>Terraza</span>
               </span>
             )}
-            {property.hasElevator && (
-              <span className="text-slate-400">Ascensor</span>
+            {property.hasSecurity24 && (
+              <span className="flex items-center gap-1 text-emerald-400" title="Seguridad 24/7">
+                <ShieldCheck size={13} />
+                <span>Seguridad 24/7</span>
+              </span>
             )}
           </div>
 
-          <div className="flex items-center gap-1" title={`Eficiencia Energética Clase ${property.energyRating}`}>
+          <div className="flex items-center gap-1">
             <Zap size={11} className="text-emerald-400" />
             <span className="font-bold text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-              {property.energyRating}
+              Clase {property.energyRating}
             </span>
           </div>
         </div>
       </div>
 
-      {/* SECCIÓN INFERIOR: BOTONES DE ACCIÓN (Ver Detalles + WhatsApp directo) */}
+      {/* SECCIÓN INFERIOR: BOTONES DE ACCIÓN */}
       <div className="p-4 bg-slate-950/60 border-t border-slate-800/80 flex items-center gap-2">
         <button
           onClick={() => onOpenDetails(property)}
@@ -278,7 +291,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
           target="_blank"
           rel="noopener noreferrer"
           className="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black p-2.5 rounded-xl transition flex items-center justify-center shadow-lg shadow-emerald-500/20"
-          title="Consultar por WhatsApp con referencia precargada"
+          title="Consultar por WhatsApp con referencia en Costa Rica"
         >
           <MessageCircle size={18} />
         </a>

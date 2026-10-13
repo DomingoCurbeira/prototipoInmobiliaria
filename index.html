@@ -1,10 +1,22 @@
 <!doctype html>
-<html lang="es">
+<html lang="es" data-theme="luxury-gold">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23d97706' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z'/><polyline points='9 22 9 12 15 12 15 22'/></svg>" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>InmoStudio Pro | Portal Inmobiliario Exclusivo</title>
+    <title>InmoStudio Costa Rica | Bienes Raíces Exclusivos</title>
+    <!-- Carga inmediata de tema persistente antes de renderizar para evitar parpadeos -->
+    <script>
+      try {
+        const saved = localStorage.getItem('inmo_custom_config');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed && parsed.activeThemeId) {
+            document.documentElement.setAttribute('data-theme', parsed.activeThemeId);
+          }
+        }
+      } catch (e) {}
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600&display=swap" rel="stylesheet">

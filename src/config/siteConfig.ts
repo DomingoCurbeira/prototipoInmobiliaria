@@ -1,68 +1,90 @@
-import { SiteConfig, ThemeColors } from '../types';
+import { SiteConfig, ThemeColors, CurrencyMode } from '../types';
 
 export const THEME_PRESETS: Record<string, ThemeColors> = {
   'luxury-gold': {
-    name: 'Luxury Gold & Slate',
-    primary: '#090d16',
-    primaryDark: '#030712',
-    accent: '#d97706', // amber-600
-    accentHover: '#b45309', // amber-700
-    accentLight: 'rgba(217, 119, 6, 0.15)',
+    id: 'luxury-gold',
+    name: 'Oro & Pizarra (Luxury Gold)',
+    accent: '#d97706',
+    accentHover: '#b45309',
+    accentLight: '#fbbf24',
     badgeBg: '#fef3c7',
+    description: 'Elegancia clásica, tonos dorados y ámbar de lujo.',
   },
   'modern-emerald': {
-    name: 'Modern Emerald & Jade',
-    primary: '#061a14',
-    primaryDark: '#020d0a',
-    accent: '#10b981', // emerald-500
-    accentHover: '#059669', // emerald-600
-    accentLight: 'rgba(16, 185, 129, 0.15)',
+    id: 'modern-emerald',
+    name: 'Esmeralda & Naturaleza (Costa Rica)',
+    accent: '#059669',
+    accentHover: '#047857',
+    accentLight: '#34d399',
     badgeBg: '#d1fae5',
+    description: 'Verde esmeralda y jade, ideal para arquitectura tropical moderna.',
   },
   'mediterranean': {
-    name: 'Terracotta & Arena',
-    primary: '#1c130e',
-    primaryDark: '#0e0907',
-    accent: '#ea580c', // orange-600 / terracotta
-    accentHover: '#c2410c', // orange-700
-    accentLight: 'rgba(234, 88, 12, 0.15)',
+    id: 'mediterranean',
+    name: 'Terracota & Sol del Pacífico',
+    accent: '#ea580c',
+    accentHover: '#c2410c',
+    accentLight: '#fb923c',
     badgeBg: '#ffedd5',
+    description: 'Tonos cálidos de atardecer, arena y madera noble.',
   },
   'corporate-blue': {
-    name: 'Sapphire & Navy',
-    primary: '#0a1426',
-    primaryDark: '#040914',
-    accent: '#2563eb', // blue-600
-    accentHover: '#1d4ed8', // blue-700
-    accentLight: 'rgba(37, 99, 235, 0.15)',
+    id: 'corporate-blue',
+    name: 'Zafiro & Corporativo (Navy)',
+    accent: '#2563eb',
+    accentHover: '#1d4ed8',
+    accentLight: '#60a5fa',
     badgeBg: '#dbeafe',
+    description: 'Azul sobrio y profesional para firmas inmobiliarias corporativas.',
   },
 };
 
 /**
- * CONFIGURACIÓN CENTRALIZADA DE LA INMOBILIARIA (Marca Blanca)
- * Modifica estos valores para personalizar toda la web en segundos.
+ * CONFIGURACIÓN CENTRALIZADA PARA COSTA RICA (Marca Blanca)
  */
 export const DEFAULT_SITE_CONFIG: SiteConfig = {
-  brandName: 'InmoElite Properties',
-  slogan: 'Inmuebles Exclusivos & Asesoramiento de Confianza',
-  subSlogan: 'Encuentra tu próximo hogar o vende con las mejores garantías legales y difusión premium del mercado.',
+  brandName: 'Costa Rica Luxury Properties',
+  slogan: 'Bienes Raíces de Alta Gama en Escazú, Santa Ana y Costa Pacífica',
+  subSlogan: 'Casas en condominio, áticos y villas exclusivas en las mejores zonas de Costa Rica con asesoría bilingüe.',
   logoIcon: 'Building2',
   contact: {
-    phone: '+34 912 345 678',
-    whatsapp: '+34 600 123 456',
-    email: 'contacto@inmoeliteproperties.com',
-    address: 'Paseo de la Castellana 120, Planta 4, Madrid',
-    openingHours: 'Lunes a Viernes de 9:30 a 19:30 • Sábados de 10:00 a 14:00',
+    phone: '+506 2289-4500',
+    whatsapp: '+506 8800-1234',
+    email: 'info@crluxuryproperties.com',
+    address: 'Plaza Tempo, Torre 2, Nivel 4, Escazú, San José, Costa Rica',
+    openingHours: 'Lunes a Viernes: 8:30 am - 6:00 pm • Sábados: Con cita previa',
+    sinpeMovil: '+506 8800-1234',
   },
-  currencySymbol: '€',
-  currencyCode: 'EUR',
+  currencyMode: 'USD',
+  exchangeRate: 520, // ₡520 CRC por $1 USD
   activeThemeId: 'luxury-gold',
 };
 
-// Formateador de moneda dinámico
-export function formatCurrency(amount: number, symbol: string = '€'): string {
-  return `${amount.toLocaleString('es-ES')} ${symbol}`;
+/**
+ * Formateador bimoneda (Dólares USD y Colones costarricenses CRC)
+ */
+export function formatDualPrice(
+  priceUSD: number,
+  currencyMode: CurrencyMode,
+  exchangeRate: number = 520,
+  isMonthly: boolean = false
+): { primary: string; secondary: string; perM2: string } {
+  const priceCRC = Math.round(priceUSD * exchangeRate);
+  const suffix = isMonthly ? '/mes' : '';
+
+  if (currencyMode === 'USD') {
+    return {
+      primary: `$${priceUSD.toLocaleString('en-US')}${suffix} USD`,
+      secondary: `≈ ₡${priceCRC.toLocaleString('es-CR')}${suffix} CRC`,
+      perM2: `$${Math.round(priceUSD / 100).toLocaleString('en-US')}/m²`,
+    };
+  } else {
+    return {
+      primary: `₡${priceCRC.toLocaleString('es-CR')}${suffix} CRC`,
+      secondary: `≈ $${priceUSD.toLocaleString('en-US')}${suffix} USD`,
+      perM2: `₡${Math.round(priceCRC / 100).toLocaleString('es-CR')}/m²`,
+    };
+  }
 }
 
 // Generador de enlace de WhatsApp con mensaje personalizado
@@ -70,20 +92,21 @@ export function getWhatsAppInquiryUrl(
   whatsappNumber: string,
   propertyRef: string,
   propertyTitle: string,
-  price: string
+  priceText: string
 ): string {
   const cleanNumber = whatsappNumber.replace(/[^0-9]/g, '');
-  const message = `Hola, me interesa recibir más información y coordinar una visita para la propiedad Ref: ${propertyRef} ("${propertyTitle}" - ${price}) que vi en su página web.`;
+  const message = `Hola, me interesa recibir más información sobre la propiedad Ref: ${propertyRef} ("${propertyTitle}" - ${priceText}) que vi en su página web. ¿Podríamos coordinar una visita?`;
   return `https://wa.me/${cleanNumber}?text=${encodeURIComponent(message)}`;
 }
 
-// Generador de WhatsApp para valoración de inmuebles (Captación de propietarios)
+// Generador de WhatsApp para valoración de inmuebles (Captación en Costa Rica)
 export function getWhatsAppValuationUrl(
   whatsappNumber: string,
   address: string,
-  propertyType: string
+  propertyType: string,
+  intent: string
 ): string {
   const cleanNumber = whatsappNumber.replace(/[^0-9]/g, '');
-  const message = `Hola, me gustaría solicitar una valoración gratuita para vender mi ${propertyType} ubicado en ${address || 'mi zona'}. ¿Podrían orientarme?`;
+  const message = `Hola, me gustaría solicitar una valoración de mercado gratuita para ${intent} mi ${propertyType} ubicado en ${address || 'Costa Rica'}. ¿Podrían brindarme asesoría?`;
   return `https://wa.me/${cleanNumber}?text=${encodeURIComponent(message)}`;
 }

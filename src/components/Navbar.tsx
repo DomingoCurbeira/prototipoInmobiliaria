@@ -1,5 +1,5 @@
 import React from 'react';
-import { SiteConfig } from '../types';
+import { SiteConfig, CurrencyMode } from '../types';
 import { Building2, Phone, Heart, Sparkles, MessageCircle } from 'lucide-react';
 
 interface NavbarProps {
@@ -8,6 +8,7 @@ interface NavbarProps {
   onOpenFavorites: () => void;
   onOpenDemoCustomizer: () => void;
   onScrollToSection: (sectionId: string) => void;
+  onToggleCurrency: (mode: CurrencyMode) => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -16,64 +17,91 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenFavorites,
   onOpenDemoCustomizer,
   onScrollToSection,
+  onToggleCurrency,
 }) => {
   return (
-    <header className="sticky top-0 z-40 w-full backdrop-blur-xl bg-slate-950/80 border-b border-slate-800/80 transition-colors">
+    <header className="sticky top-0 z-40 w-full backdrop-blur-xl bg-slate-950/85 border-b border-slate-800/80 transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
         {/* LOGO & NOMBRE DE LA INMOBILIARIA */}
         <div
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
           className="flex items-center gap-3 cursor-pointer group select-none shrink-0"
         >
-          <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-amber-500 to-amber-700 flex items-center justify-center text-slate-950 shadow-lg shadow-amber-500/20 group-hover:scale-105 transition-transform">
+          <div className="w-11 h-11 rounded-2xl bg-brand-grad flex items-center justify-center text-slate-950 shadow-brand group-hover:scale-105 transition-transform">
             <Building2 size={24} className="stroke-[2.2]" />
           </div>
           <div className="text-left">
-            <span className="text-lg font-black tracking-tight text-white block leading-tight font-serif-luxury group-hover:text-amber-400 transition-colors">
+            <span className="text-lg font-black tracking-tight text-white block leading-tight font-serif-luxury group-hover:text-brand transition-colors">
               {config.brandName}
             </span>
             <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 block leading-none">
-              Real Estate Studio
+              Costa Rica Real Estate
             </span>
           </div>
         </div>
 
         {/* ENLACES DE NAVEGACIÓN (Desktop) */}
-        <nav className="hidden md:flex items-center gap-7 text-xs font-bold tracking-wider uppercase text-slate-300">
+        <nav className="hidden md:flex items-center gap-6 text-xs font-bold tracking-wider uppercase text-slate-300">
           <button
             onClick={() => onScrollToSection('catalogo')}
-            className="hover:text-amber-400 transition-colors cursor-pointer"
+            className="hover:text-brand transition-colors cursor-pointer"
           >
             Propiedades
           </button>
           <button
             onClick={() => onScrollToSection('vender')}
-            className="hover:text-amber-400 transition-colors cursor-pointer"
+            className="hover:text-brand transition-colors cursor-pointer"
           >
-            Vender Inmueble
+            Vender / Alquilar
           </button>
           <button
             onClick={() => onScrollToSection('hipoteca')}
-            className="hover:text-amber-400 transition-colors cursor-pointer"
+            className="hover:text-brand transition-colors cursor-pointer"
           >
-            Calculadora Hipoteca
+            Crédito Hipotecario
           </button>
           <button
             onClick={() => onScrollToSection('equipo')}
-            className="hover:text-amber-400 transition-colors cursor-pointer"
+            className="hover:text-brand transition-colors cursor-pointer"
           >
             Asesores
           </button>
           <button
             onClick={() => onScrollToSection('contacto')}
-            className="hover:text-amber-400 transition-colors cursor-pointer"
+            className="hover:text-brand transition-colors cursor-pointer"
           >
             Contacto
           </button>
         </nav>
 
-        {/* ACCIONES DE CONTACTO Y FAVORITOS */}
-        <div className="flex items-center gap-2.5 shrink-0">
+        {/* SELECTOR DE MONEDA COSTA RICA (DÓLARES / COLONES) & ACCIONES */}
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+          {/* CONMUTADOR DE MONEDA BIMONEDA */}
+          <div className="flex items-center bg-slate-900 border border-slate-800 rounded-xl p-1 text-[11px] font-black shadow-inner">
+            <button
+              onClick={() => onToggleCurrency('USD')}
+              className={`px-2.5 py-1 rounded-lg transition cursor-pointer ${
+                config.currencyMode === 'USD'
+                  ? 'bg-brand text-slate-950 shadow-sm'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+              title="Mostrar precios en Dólares Estadounidenses ($ USD)"
+            >
+              $ USD
+            </button>
+            <button
+              onClick={() => onToggleCurrency('CRC')}
+              className={`px-2.5 py-1 rounded-lg transition cursor-pointer ${
+                config.currencyMode === 'CRC'
+                  ? 'bg-brand text-slate-950 shadow-sm'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+              title="Mostrar precios en Colones Costarricenses (₡ CRC)"
+            >
+              ₡ CRC
+            </button>
+          </div>
+
           {/* Botón de Favoritos */}
           <button
             onClick={onOpenFavorites}
@@ -99,23 +127,23 @@ export const Navbar: React.FC<NavbarProps> = ({
             <span>WhatsApp</span>
           </a>
 
-          {/* Botón Llamar */}
+          {/* Botón Llamar Costa Rica */}
           <a
             href={`tel:${config.contact.phone}`}
-            className="hidden lg:flex items-center gap-2 bg-slate-900 border border-slate-800 hover:border-slate-700 px-3.5 py-2 rounded-xl text-xs font-bold text-slate-200 transition"
+            className="hidden lg:flex items-center gap-2 bg-slate-900 border border-slate-800 hover:border-slate-700 px-3 py-2 rounded-xl text-xs font-bold text-slate-200 transition"
           >
-            <Phone size={14} className="text-amber-400" />
+            <Phone size={14} className="text-brand" />
             <span>{config.contact.phone}</span>
           </a>
 
-          {/* Botón de Ajustes de Marca (Para la reunión de venta) */}
+          {/* Botón Personalizar Marca (Modo Demo) */}
           <button
             onClick={onOpenDemoCustomizer}
-            className="flex items-center gap-1.5 bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 px-3.5 py-2 rounded-xl text-xs font-black shadow-lg shadow-amber-500/20 hover:scale-105 active:scale-95 transition cursor-pointer"
-            title="Cambiar Nombre y Colores en Vivo para tu Cliente"
+            className="flex items-center gap-1.5 bg-brand-grad text-slate-950 px-3.5 py-2 rounded-xl text-xs font-black shadow-brand hover:scale-105 active:scale-95 transition cursor-pointer"
+            title="Cambiar Nombre, Colores y Moneda en Vivo"
           >
             <Sparkles size={14} />
-            <span className="hidden sm:inline">Personalizar Marca</span>
+            <span className="hidden sm:inline">Modo Demo</span>
           </button>
         </div>
       </div>

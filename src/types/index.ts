@@ -18,6 +18,8 @@ export type PropertyStatus =
 
 export type EnergyRating = 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G';
 
+export type CurrencyMode = 'USD' | 'CRC';
+
 export interface Property {
   id: string;
   reference: string;
@@ -27,31 +29,31 @@ export interface Property {
   operation: OperationType;
   type: PropertyType;
   status: PropertyStatus;
-  price: number;
-  previousPrice?: number; // Para mostrar bajada de precio tachado
-  city: string;
-  neighborhood: string;
-  locationHighlights?: string; // Ej: "A 5 min de la playa y colegios"
+  priceUSD: number; // Precio base en Dólares USD
+  previousPriceUSD?: number; // Para mostrar bajada de precio tachado
+  province: string; // San José, Alajuela, Heredia, Puntarenas, Guanacaste
+  city: string; // Escazú, Santa Ana, Quepos, etc.
+  neighborhood: string; // Jaboncillos, Lindora, Manuel Antonio, etc.
+  locationHighlights?: string; // Ej: "A 5 min de Multiplaza y colegios privados"
   bedrooms: number;
   bathrooms: number;
   areaBuilt: number; // m²
-  areaUsable?: number; // m²
+  areaLot?: number; // m² de terreno/parcela
   garageSpots: number;
-  floor?: string; // Ej: "3ª planta"
+  floor?: string; // Ej: "Torre piso 6"
   hasElevator: boolean;
   hasPool: boolean;
   hasTerrace: boolean;
   hasGarden: boolean;
   hasAirConditioning: boolean;
-  hasHeating: boolean;
+  hasSecurity24: boolean;
   energyRating: EnergyRating;
   yearBuilt: number;
   images: string[];
   featured: boolean;
   createdAt: string;
   agentId: string;
-  communityFeesMonthly?: number; // Cuota comunidad
-  ibiAnnual?: number;
+  hoaMonthlyUSD?: number; // Cuota condominal mensual en USD
 }
 
 export interface Agent {
@@ -97,13 +99,13 @@ export interface FilterState {
 }
 
 export interface ThemeColors {
+  id: string;
   name: string;
-  primary: string;
-  primaryDark: string;
   accent: string;
   accentHover: string;
   accentLight: string;
   badgeBg: string;
+  description: string;
 }
 
 export interface SiteConfig {
@@ -117,8 +119,9 @@ export interface SiteConfig {
     email: string;
     address: string;
     openingHours: string;
+    sinpeMovil: string;
   };
-  currencySymbol: string;
-  currencyCode: string;
+  currencyMode: CurrencyMode; // 'USD' ($) o 'CRC' (₡)
+  exchangeRate: number; // Tipo de cambio (ej. ₡520 por $1 USD)
   activeThemeId: string;
 }

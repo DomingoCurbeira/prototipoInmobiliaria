@@ -10,15 +10,15 @@ export const TestimonialsSection: React.FC<TestimonialsSectionProps> = ({ testim
   return (
     <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-left">
       <div className="text-center max-w-2xl mx-auto mb-12 space-y-2">
-        <div className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-widest text-amber-400">
+        <div className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-widest text-brand">
           <MessageSquareQuote size={14} />
-          <span>Opiniones Verificadas</span>
+          <span>Experiencias Verificadas en Costa Rica</span>
         </div>
         <h2 className="text-3xl sm:text-4xl font-black text-white font-serif-luxury tracking-tight">
-          La Experiencia de Nuestros Clientes
+          La Opinión de Nuestros Clientes
         </h2>
         <p className="text-xs sm:text-sm text-slate-400">
-          Familias, inversores y propietarios que confiaron en nuestra gestión patrimonial.
+          Familias, inversionistas y propietarios que han comprado o vendido con éxito.
         </p>
       </div>
 
@@ -46,16 +46,16 @@ export const TestimonialsSection: React.FC<TestimonialsSectionProps> = ({ testim
               <img
                 src={test.avatarUrl}
                 alt={test.author}
-                className="w-11 h-11 rounded-full object-cover border border-amber-500/30"
+                className="w-11 h-11 rounded-full object-cover border border-brand"
               />
               <div>
                 <h4 className="text-xs font-black text-white flex items-center gap-1.5">
                   <span>{test.author}</span>
-                  <span title="Operación verificada">
+                  <span title="Operación verificada en Costa Rica">
                     <CheckCircle2 size={13} className="text-emerald-400" />
                   </span>
                 </h4>
-                <p className="text-[10px] text-amber-400 font-semibold">{test.role}</p>
+                <p className="text-[10px] text-brand font-semibold">{test.role}</p>
                 <p className="text-[10px] text-slate-500 truncate max-w-[200px]">{test.propertyPurchased}</p>
               </div>
             </div>
